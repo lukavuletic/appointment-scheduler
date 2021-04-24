@@ -1,47 +1,40 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import CoreService from './core/CoreService';
-
-interface Time_slot {
-  start_time: string,
-  end_time: string,
-}
-
-interface Company {
-  id: number,
-  name: string,
-  type: string,
-  time_slots: Time_slot[],
-}
+import { CompanyContainer } from './components/CompanyContainer';
+import ICompany from './models/ICompany';
 
 function App() {
   const companiesCoreService = new CoreService('companies');
 
-  const [companies, setStateCompanies] = useState<Company[]>([]);
+  const [companies, setStateCompanies] = useState<ICompany[]>([]);
 
   useEffect(() => {
     const fetchCompanies = async (): Promise<void> => {
-      const companiesRes: Company[] = await getCompanies();
+      const companiesRes: ICompany[] = await getCompanies();
       setStateCompanies(companiesRes);
     }
 
     fetchCompanies();
   }, []);
 
-  const getCompanies = async (): Promise<Array<Company>> => {
-    const res: Company[] = await companiesCoreService.get();
-    console.log(res)
-    return res;
+  const getCompanies = async (): Promise<ICompany[]> => {
+    const res: ICompany[] = await companiesCoreService.get();
+    return res.map(company => { return { ...company, selectedTimeSlot: { start_time: '', end_time: '' } } });
   }
 
-  const getCompany = async (id: number): Promise<Company> => {
-    const res: Company = await companiesCoreService.find(id);
+  const getCompany = async (id: number): Promise<ICompany> => {
+    const res: ICompany = await companiesCoreService.find(id);
     return res;
   }
 
   return (
     <div className="container">
-      working...
+      {companies.map(company => {
+        return (
+          <CompanyContainer key={company.id} company={company} />
+        )
+      })}
     </div>
   );
 }
