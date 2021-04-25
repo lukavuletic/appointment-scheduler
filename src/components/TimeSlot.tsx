@@ -1,5 +1,5 @@
 import React from 'react';
-import ITime_slot from '../models/ITime_slot';
+import ITime_slot from '../interfaces/ITime_slot';
 import { Input } from './Input';
 
 interface Props {

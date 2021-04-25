@@ -2,12 +2,22 @@ import './App.css';
 import React, { useState, useEffect } from 'react';
 import CoreService from './core/CoreService';
 import { CompanyContainer } from './components/CompanyContainer';
-import ICompany from './models/ICompany';
+import ICompany from './interfaces/ICompany';
+import ICompanyReservation from './interfaces/ICompanyReservation';
 
 function App() {
   const companiesCoreService = new CoreService('companies');
 
   const [companies, setStateCompanies] = useState<ICompany[]>([]);
+  const [companyReservation, setStateCompanyReservation] = useState<ICompanyReservation>({
+    id: 0,
+    name: '',
+    type: '',
+    time_slot: {
+      start_time: '',
+      end_time: '',
+    }
+  });
 
   useEffect(() => {
     const fetchCompanies = async (): Promise<void> => {
@@ -20,7 +30,7 @@ function App() {
 
   const getCompanies = async (): Promise<ICompany[]> => {
     const res: ICompany[] = await companiesCoreService.get();
-    return res.map(company => { return { ...company, selectedTimeSlot: { start_time: '', end_time: '' } } });
+    return res;
   }
 
   const getCompany = async (id: number): Promise<ICompany> => {
@@ -32,7 +42,7 @@ function App() {
     <div className="container">
       {companies.map(company => {
         return (
-          <CompanyContainer key={company.id} company={company} />
+          <CompanyContainer key={company.id} company={company} companyReservation={companyReservation} />
         )
       })}
     </div>
