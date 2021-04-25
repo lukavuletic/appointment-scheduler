@@ -10,17 +10,20 @@ function App() {
   const companiesCoreService = new CoreService('companies');
 
   const [companies, setStateCompanies] = useState<ICompany[]>([]);
-  const [companyReservation, setStateCompanyReservation] = useState<ICompanyReservation>({
-    id: 0,
-    name: '',
-    type: '',
-    time_slots: [],
-  });
+  const [companyReservations, setStateCompanyReservations] = useState<ICompanyReservation[]>([]);
 
   useEffect(() => {
     const fetchCompanies = async (): Promise<void> => {
       const companiesRes: ICompany[] = await getCompanies();
+      const companyReservationsArr: ICompanyReservation[] = companiesRes.map(c => {
+        return {
+          id: c.id,
+          time_slots: [],
+        }
+      });
+
       setStateCompanies(companiesRes);
+      setStateCompanyReservations(companyReservationsArr);
     }
 
     fetchCompanies();
@@ -52,7 +55,7 @@ function App() {
   }
 
   const selectTimeSlot: (company: ICompany, timeSlot: ITime_slot) => void = (company, timeSlot) => {
-    const { time_slots, ...otherProps } = company;
+    const companyReservation: ICompanyReservation = companyReservations.find(({ id }) => id === company.id)!;
     let timeSlotsToMatch: ITime_slot[] = [];
 
     // update selected timeslots
@@ -69,25 +72,32 @@ function App() {
       timeSlotsToMatch = companyReservation.time_slots.slice(0, companyReservation.time_slots.length - 1);
     } else if (timeSlot.isSelected) { // is selected, therefore we want to remove some timeslots
       const startOrdinal: number = Math.min(...companyReservation.time_slots.map(({ ordinal }) => ordinal!));
-      const endingOrdinal: number = timeSlot.ordinal! > startOrdinal ? timeSlot.ordinal! : startOrdinal;
+      const endingOrdinal: number = (timeSlot.ordinal! > startOrdinal) ? timeSlot.ordinal! : startOrdinal;
 
       timeSlotsToMatch = company.time_slots.slice(startOrdinal, endingOrdinal + 1);
     }
 
     // update isSelected on company and on selected time slots
     const selectedOrdinals: number[] = timeSlotsToMatch.map(({ ordinal }) => { return ordinal! });
-    timeSlotsToMatch = getUpdatedTimeSlots(timeSlotsToMatch, selectedOrdinals);
+
+    const updatedCompanyReservation: ICompanyReservation = {
+      ...companyReservation,
+      time_slots: getUpdatedTimeSlots(timeSlotsToMatch, selectedOrdinals),
+    }
+    const updatedCompanyReservationIdx: number = companyReservations.findIndex(({ id }) => id === companyReservation.id);
+    let updatedCompanyReservations: ICompanyReservation[] = companyReservations.slice();
+    updatedCompanyReservations[updatedCompanyReservationIdx] = updatedCompanyReservation;
 
     const updatedCompany: ICompany = {
       ...company,
       time_slots: getUpdatedTimeSlots(company.time_slots, selectedOrdinals),
     };
-    const updatedCompanyIdx = companies.findIndex(({ id }) => id === company.id);
+    const updatedCompanyIdx: number = companies.findIndex(({ id }) => id === company.id);
     let updatedCompanies: ICompany[] = companies.slice();
     updatedCompanies[updatedCompanyIdx] = updatedCompany;
 
     setStateCompanies(updatedCompanies);
-    setStateCompanyReservation({ ...otherProps, time_slots: timeSlotsToMatch });
+    setStateCompanyReservations(updatedCompanyReservations);
   }
 
   return (
@@ -97,7 +107,7 @@ function App() {
           <CompanyContainer
             key={company.id}
             company={company}
-            companyReservation={companyReservation}
+            companyReservation={companyReservations[0]}
             selectTimeSlot={selectTimeSlot}
           />
         )

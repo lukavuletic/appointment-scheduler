@@ -7,7 +7,7 @@ import { TimeSlot } from './TimeSlot';
 
 interface Props {
     company: ICompany;
-    companyReservation: ICompanyReservation;
+    companyReservation?: ICompanyReservation;
     selectTimeSlot: (company: ICompany, timeSlot: ITime_slot) => void;
 }
 
@@ -15,13 +15,15 @@ export const CompanyContainer: React.FC<Props> = ({ company, companyReservation,
     return (
         <div className="container-wrapper">
             <CompanyName name={company.name} />
-            <TimeSlot
-                timeSlot={{
-                    start_time: (companyReservation.time_slots[0] && companyReservation.time_slots[0].start_time) || '',
-                    end_time: (companyReservation.time_slots[0] && companyReservation.time_slots[companyReservation.time_slots.length - 1].end_time) || '',
-                }}
-                title='Reservation'
-            />
+            {companyReservation &&
+                <TimeSlot
+                    timeSlot={{
+                        start_time: (companyReservation.time_slots[0] && companyReservation.time_slots[0].start_time) || '',
+                        end_time: (companyReservation.time_slots[0] && companyReservation.time_slots[companyReservation.time_slots.length - 1].end_time) || '',
+                    }}
+                    title='Reservation'
+                />
+            }
             {company.time_slots.map((timeSlot: ITime_slot, idx: number) => {
                 return (
                     <div
