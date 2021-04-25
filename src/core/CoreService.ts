@@ -12,12 +12,6 @@ class CoreService implements CoreServiceInterface {
         const data = await res.json();
         return data;
     }
-
-    find: (id: number) => any = async (id: number) => {
-        const res = await fetch(`${baseURL}/${this.uRLPath}/${id}`);
-        const data = await res.json();
-        return data;
-    }
 }
 
 export default CoreService;

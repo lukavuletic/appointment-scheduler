@@ -12,19 +12,24 @@ interface Props {
 }
 
 export const CompanyContainer: React.FC<Props> = ({ company, companyReservation, selectTimeSlot }) => {
-    console.log(company)
     return (
         <div className="container-wrapper">
             <CompanyName name={company.name} />
-            <TimeSlot timeSlot={companyReservation.time_slot} title='Reservation' />
+            <TimeSlot
+                timeSlot={{
+                    start_time: (companyReservation.time_slots[0] && companyReservation.time_slots[0].start_time) || '',
+                    end_time: (companyReservation.time_slots[0] && companyReservation.time_slots[companyReservation.time_slots.length - 1].end_time) || '',
+                }}
+                title='Reservation'
+            />
             {company.time_slots.map((timeSlot: ITime_slot, idx: number) => {
                 return (
                     <div
+                        key={idx}
                         className="timeslot"
                         onClick={() => selectTimeSlot && selectTimeSlot(company, timeSlot)}
                     >
                         <TimeSlot
-                            key={idx}
                             timeSlot={timeSlot}
                         />
                     </div>

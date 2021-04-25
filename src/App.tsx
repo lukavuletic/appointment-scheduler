@@ -14,10 +14,7 @@ function App() {
     id: 0,
     name: '',
     type: '',
-    time_slot: {
-      start_time: '',
-      end_time: '',
-    }
+    time_slots: [],
   });
 
   useEffect(() => {
@@ -31,56 +28,66 @@ function App() {
 
   const getCompanies = async (): Promise<ICompany[]> => {
     const res: ICompany[] = await companiesCoreService.get();
-    return res;
+    return res.map(company => {
+      return {
+        ...company,
+        time_slots: company.time_slots.map((time_slot, idx) => {
+          return {
+            ...time_slot,
+            isSelected: false,
+            ordinal: idx,
+          }
+        }),
+      }
+    });
   }
 
-  const getCompany = async (id: number): Promise<ICompany> => {
-    const res: ICompany = await companiesCoreService.find(id);
-    return res;
+  const getUpdatedTimeSlots = (dataArr: ITime_slot[], ordinalsToUpdate: number[]): ITime_slot[] => {
+    return dataArr.map(item => {
+      return {
+        ...item,
+        isSelected: ordinalsToUpdate.includes(item.ordinal!)
+      }
+    });
   }
 
   const selectTimeSlot: (company: ICompany, timeSlot: ITime_slot) => void = (company, timeSlot) => {
     const { time_slots, ...otherProps } = company;
-    const companyReservationStartTime: string = companyReservation.time_slot.start_time;
-    const companyReservationEndTime: string = companyReservation.time_slot.end_time;
+    let timeSlotsToMatch: ITime_slot[] = [];
 
-    let timeSlotFinal: ITime_slot = {
-      start_time: '',
-      end_time: '',
-    };
+    // update selected timeslots
+    if (companyReservation.time_slots.length === 0) {
+      timeSlotsToMatch.push(timeSlot);
+    } else if (!timeSlot.isSelected) { // is not selected, therefore we want to add some timeslots
+      const startOrdinal: number = Math.min(timeSlot.ordinal!, ...companyReservation.time_slots.map(({ ordinal }) => ordinal!));
+      const endOrdinal: number = Math.max(timeSlot.ordinal!, ...companyReservation.time_slots.map(({ ordinal }) => ordinal!));
 
-    if (companyReservationStartTime !== '' && companyReservationEndTime !== '') {
-      if (companyReservationStartTime === timeSlot.start_time) { // once again selected same timeslot; not cast into Date because of ms
-        timeSlotFinal.start_time = companyReservationStartTime;
-        timeSlotFinal.end_time = timeSlot.end_time;
-      } else if (new Date(companyReservationStartTime) < new Date(timeSlot.start_time) // shorten reservation time
-        && new Date(companyReservationEndTime) < new Date(timeSlot.end_time)
-      ) {
-        timeSlotFinal.start_time = companyReservationStartTime;
-        timeSlotFinal.end_time = timeSlot.end_time;
-      } else if (new Date(companyReservationStartTime) > new Date(timeSlot.start_time) // lenghten reservation time
-        && new Date(companyReservationEndTime) > new Date(timeSlot.end_time)
-      ) {
-        timeSlotFinal.start_time = timeSlot.start_time;
-        timeSlotFinal.end_time = companyReservationEndTime;
-      } else if (new Date(companyReservationStartTime) < new Date(timeSlot.start_time)
-        && new Date(companyReservationEndTime) > new Date(timeSlot.end_time)
-      ) {
-        timeSlotFinal.start_time = companyReservationStartTime;
-        timeSlotFinal.end_time = timeSlot.end_time;
-      } else if (new Date(companyReservationStartTime) > new Date(timeSlot.start_time)
-        && new Date(companyReservationEndTime) < new Date(timeSlot.end_time)
-      ) {
-        timeSlotFinal.start_time = timeSlot.start_time;
-        timeSlotFinal.end_time = companyReservationEndTime;
-      } else {
-        return;
-      }
-    } else {
-      timeSlotFinal = timeSlot;
+      timeSlotsToMatch = company.time_slots.slice(startOrdinal, endOrdinal + 1);
+    } else if (timeSlot.isSelected && timeSlot.start_time === companyReservation.time_slots[0].start_time) {
+      timeSlotsToMatch = companyReservation.time_slots.slice(1);
+    } else if (timeSlot.isSelected && timeSlot.end_time === companyReservation.time_slots[companyReservation.time_slots.length - 1].end_time) {
+      timeSlotsToMatch = companyReservation.time_slots.slice(0, companyReservation.time_slots.length - 1);
+    } else if (timeSlot.isSelected) { // is selected, therefore we want to remove some timeslots
+      const startOrdinal: number = Math.min(...companyReservation.time_slots.map(({ ordinal }) => ordinal!));
+      const endingOrdinal: number = timeSlot.ordinal! > startOrdinal ? timeSlot.ordinal! : startOrdinal;
+
+      timeSlotsToMatch = company.time_slots.slice(startOrdinal, endingOrdinal + 1);
     }
 
-    setStateCompanyReservation({ ...otherProps, time_slot: timeSlotFinal });
+    // update isSelected on company and on selected time slots
+    const selectedOrdinals: number[] = timeSlotsToMatch.map(({ ordinal }) => { return ordinal! });
+    timeSlotsToMatch = getUpdatedTimeSlots(timeSlotsToMatch, selectedOrdinals);
+
+    const updatedCompany: ICompany = {
+      ...company,
+      time_slots: getUpdatedTimeSlots(company.time_slots, selectedOrdinals),
+    };
+    const updatedCompanyIdx = companies.findIndex(({ id }) => id === company.id);
+    let updatedCompanies: ICompany[] = companies.slice();
+    updatedCompanies[updatedCompanyIdx] = updatedCompany;
+
+    setStateCompanies(updatedCompanies);
+    setStateCompanyReservation({ ...otherProps, time_slots: timeSlotsToMatch });
   }
 
   return (

@@ -12,7 +12,7 @@ interface Props {
 
 export const TimeSlot: React.FC<Props> = ({ timeSlot, title }) => {
     return (
-        <div>
+        <div className={timeSlot.isSelected ? 'timeslot-selected' : ''}>
             { title &&
                 <div className="title">
                     {title} < br />

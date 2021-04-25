@@ -4,5 +4,5 @@ export default interface ICompany {
   id: number;
   name: string;
   type: string;
-  time_slot: ITime_slot;
+  time_slots: ITime_slot[];
 }
