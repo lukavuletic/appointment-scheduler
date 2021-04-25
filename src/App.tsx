@@ -50,7 +50,6 @@ function App() {
       return {
         ...item,
         isSelected: ordinalsToUpdate.includes(item.ordinal!),
-        isTakenUnderOtherCompany: false,
       }
     });
   }
@@ -59,6 +58,8 @@ function App() {
     const companyReservation: ICompanyReservation = companyReservations.find(({ id }) => id === company.id)!;
     let timeSlotsToMatch: ITime_slot[] = [];
 
+    // TODO - prevent selection on select of [c:ts]3-1:3-4 combination while [c:ts]1-2:1-3 combination exists
+    // TODO - prevent add of another day
     // update selected timeslots
     if (companyReservation.time_slots.length === 0) {
       timeSlotsToMatch.push(timeSlot);
@@ -97,7 +98,20 @@ function App() {
     let updatedCompanies: ICompany[] = companies.slice();
     updatedCompanies[updatedCompanyIdx] = updatedCompany;
 
-    // update isTakenUnderOtherCompany on all given companies
+    // check whether selected timeslot is already selected by any other company
+    // TODO - update isTakenUnderOtherCompany on unselect of already selected timeslot
+    const selectedTimeSlotIsSelectedOfOtherCompanies: boolean[] = updatedCompanies.map(c => {
+      // skip checking for the same company
+      if (c.id === company.id) {
+        return false;
+      } else {
+        const cTS = c.time_slots.find(({ ordinal }) => { return ordinal === timeSlot.ordinal })!.isSelected!;
+        return cTS;
+      }
+    });
+    const isTimeSlotTakenUnderOtherCompany: boolean = selectedTimeSlotIsSelectedOfOtherCompanies.some(i => i === true);
+  
+    // update isTakenUnderOtherCompany on all other companies
     updatedCompanies = updatedCompanies.map(c => {
       // don't touch already updated company
       if (c.id === company.id) {
@@ -108,7 +122,7 @@ function App() {
           time_slots: c.time_slots.map(ts => {
             return {
               ...ts,
-              isTakenUnderOtherCompany: selectedOrdinals.includes(ts.ordinal!),
+              isTakenUnderOtherCompany: selectedOrdinals.includes(ts.ordinal!) || isTimeSlotTakenUnderOtherCompany || ts.isTakenUnderOtherCompany,
             }
           }),
         }

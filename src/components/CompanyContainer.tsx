@@ -16,13 +16,16 @@ export const CompanyContainer: React.FC<Props> = ({ company, companyReservation,
         <div className="container-wrapper">
             <CompanyName name={company.name} />
             {companyReservation &&
-                <TimeSlot
-                    timeSlot={{
-                        start_time: (companyReservation.time_slots[0] && companyReservation.time_slots[0].start_time) || '',
-                        end_time: (companyReservation.time_slots[0] && companyReservation.time_slots[companyReservation.time_slots.length - 1].end_time) || '',
-                    }}
-                    title='Reservation'
-                />
+                <span>
+                    <TimeSlot
+                        timeSlot={{
+                            start_time: (companyReservation.time_slots[0] && companyReservation.time_slots[0].start_time) || '',
+                            end_time: (companyReservation.time_slots[0] && companyReservation.time_slots[companyReservation.time_slots.length - 1].end_time) || '',
+                        }}
+                        title='Reservation'
+                    />
+                    <hr />
+                </span>
             }
             {company.time_slots.map((timeSlot: ITime_slot, idx: number) => {
                 return (
