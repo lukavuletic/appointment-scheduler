@@ -28,8 +28,8 @@ export const CompanyContainer: React.FC<Props> = ({ company, companyReservation,
                 return (
                     <div
                         key={idx}
-                        className="timeslot"
-                        onClick={() => selectTimeSlot && selectTimeSlot(company, timeSlot)}
+                        className={`timeslot ${(timeSlot.isTakenUnderOtherCompany && ' timeslot-disabled')}`}
+                        onClick={() => selectTimeSlot && !timeSlot.isTakenUnderOtherCompany && selectTimeSlot(company, timeSlot)}
                     >
                         <TimeSlot
                             timeSlot={timeSlot}

@@ -5,7 +5,7 @@
 }
 
 .timeslot {
-    margin: 10px;
+    margin: 10px 0;
 }
 
 .title {
@@ -14,4 +14,8 @@
 
 .timeslot-selected {
     background-color: blanchedalmond;
+}
+
+.timeslot-disabled {
+    background-color: lightgray;
 }

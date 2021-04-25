@@ -13,12 +13,12 @@ interface Props {
 export const TimeSlot: React.FC<Props> = ({ timeSlot, title }) => {
     return (
         <div className={timeSlot.isSelected ? 'timeslot-selected' : ''}>
-            { title &&
+            {title &&
                 <div className="title">
                     {title} < br />
                 </div>
             }
-            < Input
+            <Input
                 text={moment(timeSlot.start_time).format(hourMinuteFormat)}
                 readOnly={true}
             />

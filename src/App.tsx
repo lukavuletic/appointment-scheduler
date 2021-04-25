@@ -45,11 +45,12 @@ function App() {
     });
   }
 
-  const getUpdatedTimeSlots = (dataArr: ITime_slot[], ordinalsToUpdate: number[]): ITime_slot[] => {
+  const getUpdatedTimeSlotsUnderSameCompany = (dataArr: ITime_slot[], ordinalsToUpdate: number[]): ITime_slot[] => {
     return dataArr.map(item => {
       return {
         ...item,
-        isSelected: ordinalsToUpdate.includes(item.ordinal!)
+        isSelected: ordinalsToUpdate.includes(item.ordinal!),
+        isTakenUnderOtherCompany: false,
       }
     });
   }
@@ -66,9 +67,9 @@ function App() {
       const endOrdinal: number = Math.max(timeSlot.ordinal!, ...companyReservation.time_slots.map(({ ordinal }) => ordinal!));
 
       timeSlotsToMatch = company.time_slots.slice(startOrdinal, endOrdinal + 1);
-    } else if (timeSlot.isSelected && timeSlot.start_time === companyReservation.time_slots[0].start_time) {
+    } else if (timeSlot.isSelected && timeSlot.start_time === companyReservation.time_slots[0].start_time) { // selecting first should remove it
       timeSlotsToMatch = companyReservation.time_slots.slice(1);
-    } else if (timeSlot.isSelected && timeSlot.end_time === companyReservation.time_slots[companyReservation.time_slots.length - 1].end_time) {
+    } else if (timeSlot.isSelected && timeSlot.end_time === companyReservation.time_slots[companyReservation.time_slots.length - 1].end_time) { // selecting last should remove it
       timeSlotsToMatch = companyReservation.time_slots.slice(0, companyReservation.time_slots.length - 1);
     } else if (timeSlot.isSelected) { // is selected, therefore we want to remove some timeslots
       const startOrdinal: number = Math.min(...companyReservation.time_slots.map(({ ordinal }) => ordinal!));
@@ -77,12 +78,12 @@ function App() {
       timeSlotsToMatch = company.time_slots.slice(startOrdinal, endingOrdinal + 1);
     }
 
-    // update isSelected on company and on selected time slots
     const selectedOrdinals: number[] = timeSlotsToMatch.map(({ ordinal }) => { return ordinal! });
 
+    // update isSelected on company and on selected time slots
     const updatedCompanyReservation: ICompanyReservation = {
       ...companyReservation,
-      time_slots: getUpdatedTimeSlots(timeSlotsToMatch, selectedOrdinals),
+      time_slots: getUpdatedTimeSlotsUnderSameCompany(timeSlotsToMatch, selectedOrdinals),
     }
     const updatedCompanyReservationIdx: number = companyReservations.findIndex(({ id }) => id === companyReservation.id);
     let updatedCompanyReservations: ICompanyReservation[] = companyReservations.slice();
@@ -90,11 +91,29 @@ function App() {
 
     const updatedCompany: ICompany = {
       ...company,
-      time_slots: getUpdatedTimeSlots(company.time_slots, selectedOrdinals),
+      time_slots: getUpdatedTimeSlotsUnderSameCompany(company.time_slots, selectedOrdinals),
     };
     const updatedCompanyIdx: number = companies.findIndex(({ id }) => id === company.id);
     let updatedCompanies: ICompany[] = companies.slice();
     updatedCompanies[updatedCompanyIdx] = updatedCompany;
+
+    // update isTakenUnderOtherCompany on all given companies
+    updatedCompanies = updatedCompanies.map(c => {
+      // don't touch already updated company
+      if (c.id === company.id) {
+        return c;
+      } else {
+        return {
+          ...c,
+          time_slots: c.time_slots.map(ts => {
+            return {
+              ...ts,
+              isTakenUnderOtherCompany: selectedOrdinals.includes(ts.ordinal!),
+            }
+          }),
+        }
+      }
+    });
 
     setStateCompanies(updatedCompanies);
     setStateCompanyReservations(updatedCompanyReservations);
