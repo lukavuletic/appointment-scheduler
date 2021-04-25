@@ -107,7 +107,7 @@ function App() {
           <CompanyContainer
             key={company.id}
             company={company}
-            companyReservation={companyReservations[0]}
+            companyReservation={companyReservations.find(({ id }) => id === company.id)}
             selectTimeSlot={selectTimeSlot}
           />
         )
