@@ -36,7 +36,7 @@ function App() {
     return res.map(company => {
       return {
         ...company,
-        time_slots: company.time_slots.map((time_slot, idx) => {
+        time_slots: company.time_slots.map((time_slot: ITime_slot, idx: number) => {
           return {
             ...time_slot,
             isSelected: false,
@@ -69,8 +69,8 @@ function App() {
     } else if (moment(timeSlot.start_time).dayOfYear() !== moment(companyReservation.time_slots[0].start_time).dayOfYear()) { // prevent add of timeslot from another day reservation
       return;
     } else if (!timeSlot.isSelected) { // timeslot is not selected, therefore we want to add some timeslots
-      const startOrdinal: number = Math.min(timeSlot.ordinal!, ...companyReservation.time_slots.map(({ ordinal }) => ordinal!));
-      const endOrdinal: number = Math.max(timeSlot.ordinal!, ...companyReservation.time_slots.map(({ ordinal }) => ordinal!));
+      const startOrdinal: number = Math.min(timeSlot.ordinal!, ...companyReservation.time_slots.map(({ ordinal }: { ordinal: number }) => ordinal!));
+      const endOrdinal: number = Math.max(timeSlot.ordinal!, ...companyReservation.time_slots.map(({ ordinal }: { ordinal: number }) => ordinal!));
 
       timeSlotsToMatch = company.time_slots.slice(startOrdinal, endOrdinal + 1);
     } else if (timeSlot.isSelected && timeSlot.start_time === companyReservation.time_slots[0].start_time) { // selecting first timeslot should remove it
@@ -78,7 +78,7 @@ function App() {
     } else if (timeSlot.isSelected && timeSlot.end_time === companyReservation.time_slots[companyReservation.time_slots.length - 1].end_time) { // selecting last timeslot should remove it
       timeSlotsToMatch = companyReservation.time_slots.slice(0, companyReservation.time_slots.length - 1);
     } else if (timeSlot.isSelected) { // timeslot is selected, therefore we want to remove some timeslots
-      const startOrdinal: number = Math.min(...companyReservation.time_slots.map(({ ordinal }) => ordinal!));
+      const startOrdinal: number = Math.min(...companyReservation.time_slots.map(({ ordinal }: { ordinal: number }) => ordinal!));
       const endingOrdinal: number = (timeSlot.ordinal! > startOrdinal) ? timeSlot.ordinal! : startOrdinal;
 
       timeSlotsToMatch = company.time_slots.slice(startOrdinal, endingOrdinal + 1);
@@ -110,7 +110,7 @@ function App() {
       if (c.id === company.id) {
         return false;
       } else {
-        const cTS = c.time_slots.find(({ ordinal }) => { return ordinal === timeSlot.ordinal })!.isSelected!;
+        const cTS = c.time_slots.find(({ ordinal }: {ordinal: number}) => { return ordinal === timeSlot.ordinal })!.isSelected!;
         return cTS;
       }
     });
@@ -124,7 +124,7 @@ function App() {
       } else {
         return {
           ...c,
-          time_slots: c.time_slots.map(ts => {
+          time_slots: c.time_slots.map((ts: ITime_slot) => {
             return {
               ...ts,
               isTakenUnderOtherCompany: selectedOrdinals.includes(ts.ordinal!) || isTimeSlotTakenUnderOtherCompany || ts.isTakenUnderOtherCompany,
