@@ -1,6 +1,9 @@
 import React from 'react';
 import ITime_slot from '../interfaces/ITime_slot';
 import { Input } from './Input';
+import moment from 'moment';
+
+const hourMinuteFormat = 'HH:mm';
 
 interface Props {
     timeSlot: ITime_slot;
@@ -9,10 +12,10 @@ interface Props {
 
 export const TimeSlot: React.FC<Props> = ({ timeSlot, title }) => {
     return (
-        <React.Fragment>
+        <div className="timeslot">
             {title}
-            <Input text={timeSlot.start_time} readOnly={true} />
-            <Input text={timeSlot.end_time} readOnly={true} />
-        </React.Fragment>
+            <Input text={moment(timeSlot.start_time).format(hourMinuteFormat)} readOnly={true} />
+            <Input text={moment(timeSlot.end_time).format(hourMinuteFormat)} readOnly={true} />
+        </div>
     )
 }

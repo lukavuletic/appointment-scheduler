@@ -13,7 +13,7 @@ interface Props {
 export const CompanyContainer: React.FC<Props> = ({ company, companyReservation }) => {
     console.log(company)
     return (
-        <React.Fragment>
+        <div className="container-wrapper">
             <CompanyName name={company.name} />
             <TimeSlot timeSlot={companyReservation.time_slot} title='Reservation' />
             {company.time_slots.map((timeSlot: ITime_slot, idx: number)=> {
@@ -21,6 +21,6 @@ export const CompanyContainer: React.FC<Props> = ({ company, companyReservation 
                     <TimeSlot key={idx} timeSlot={timeSlot} />
                 )
             })}
-        </React.Fragment>
+        </div>
     )
 }

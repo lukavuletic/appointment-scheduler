@@ -1,0 +1,9 @@
+.container-wrapper {
+    width: 300px;
+    float: left;
+    margin: 10px;
+}
+
+.timeslot {
+    margin: 10px;
+}
