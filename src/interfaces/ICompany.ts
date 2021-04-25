@@ -1,6 +1,6 @@
-import ITime_slot from "./ITime_slot";
+import { ITime_slot } from "./";
 
-export default interface ICompany {    
+export default interface ICompany {
   id: number;
   name: string;
   type: string;

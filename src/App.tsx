@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 
 import './App.css';
-import CoreService from './core/CoreService';
+import { CoreService } from './core';
 
-import { CompanyContainer } from './components/CompanyContainer';
+import { CompanyContainer } from './components';
 
-import ICompany from './interfaces/ICompany';
-import ICompanyReservation from './interfaces/ICompanyReservation';
-import ITime_slot from './interfaces/ITime_slot';
+import { ICompany, ICompanyReservation, ITime_slot } from './interfaces';
 
 function App() {
   const companiesCoreService = new CoreService('companies');

@@ -1,4 +1,4 @@
-import ITime_slot from "./ITime_slot";
+import { ITime_slot } from "./";
 
 export default interface ICompanyReservation {
   id: number;

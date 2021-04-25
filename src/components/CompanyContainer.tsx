@@ -1,10 +1,9 @@
 import React from 'react';
-import ICompany from '../interfaces/ICompany';
-import ITime_slot from '../interfaces/ITime_slot';
-import ICompanyReservation from '../interfaces/ICompanyReservation';
-import { CompanyName } from './CompanyName';
-import { TimeSlot } from './TimeSlot';
 import moment from 'moment';
+
+import { ICompany, ITime_slot, ICompanyReservation } from '../interfaces';
+
+import { CompanyName, TimeSlot } from './';
 
 interface Props {
     company: ICompany;
