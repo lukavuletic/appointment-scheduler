@@ -1,7 +1,9 @@
 import React from 'react';
-import ITime_slot from '../interfaces/ITime_slot';
-import { Input } from './Input';
 import moment from 'moment';
+
+import { Input } from './Input';
+
+import ITime_slot from '../interfaces/ITime_slot';
 
 const hourMinuteFormat = 'HH:mm';
 const selectDateText = 'Please select a date'

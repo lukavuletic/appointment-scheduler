@@ -1,7 +1,11 @@
-import './App.css';
 import React, { useState, useEffect } from 'react';
+import moment from 'moment';
+
+import './App.css';
 import CoreService from './core/CoreService';
+
 import { CompanyContainer } from './components/CompanyContainer';
+
 import ICompany from './interfaces/ICompany';
 import ICompanyReservation from './interfaces/ICompanyReservation';
 import ITime_slot from './interfaces/ITime_slot';
@@ -59,20 +63,23 @@ function App() {
     let timeSlotsToMatch: ITime_slot[] = [];
 
     // TODO - prevent selection on select of [c:ts]3-1:3-4 combination while [c:ts]1-2:1-3 combination exists
-    // TODO - prevent add of another day
+    // only continue further if timeSlot.ordinal isn't between any selected company reservation
+
     // update selected timeslots
     if (companyReservation.time_slots.length === 0) {
       timeSlotsToMatch.push(timeSlot);
-    } else if (!timeSlot.isSelected) { // is not selected, therefore we want to add some timeslots
+    } else if (moment(timeSlot.start_time).dayOfYear() !== moment(companyReservation.time_slots[0].start_time).dayOfYear()) { // prevent add of timeslot from another day reservation
+      return;
+    } else if (!timeSlot.isSelected) { // timeslot is not selected, therefore we want to add some timeslots
       const startOrdinal: number = Math.min(timeSlot.ordinal!, ...companyReservation.time_slots.map(({ ordinal }) => ordinal!));
       const endOrdinal: number = Math.max(timeSlot.ordinal!, ...companyReservation.time_slots.map(({ ordinal }) => ordinal!));
 
       timeSlotsToMatch = company.time_slots.slice(startOrdinal, endOrdinal + 1);
-    } else if (timeSlot.isSelected && timeSlot.start_time === companyReservation.time_slots[0].start_time) { // selecting first should remove it
+    } else if (timeSlot.isSelected && timeSlot.start_time === companyReservation.time_slots[0].start_time) { // selecting first timeslot should remove it
       timeSlotsToMatch = companyReservation.time_slots.slice(1);
-    } else if (timeSlot.isSelected && timeSlot.end_time === companyReservation.time_slots[companyReservation.time_slots.length - 1].end_time) { // selecting last should remove it
+    } else if (timeSlot.isSelected && timeSlot.end_time === companyReservation.time_slots[companyReservation.time_slots.length - 1].end_time) { // selecting last timeslot should remove it
       timeSlotsToMatch = companyReservation.time_slots.slice(0, companyReservation.time_slots.length - 1);
-    } else if (timeSlot.isSelected) { // is selected, therefore we want to remove some timeslots
+    } else if (timeSlot.isSelected) { // timeslot is selected, therefore we want to remove some timeslots
       const startOrdinal: number = Math.min(...companyReservation.time_slots.map(({ ordinal }) => ordinal!));
       const endingOrdinal: number = (timeSlot.ordinal! > startOrdinal) ? timeSlot.ordinal! : startOrdinal;
 
@@ -110,7 +117,7 @@ function App() {
       }
     });
     const isTimeSlotTakenUnderOtherCompany: boolean = selectedTimeSlotIsSelectedOfOtherCompanies.some(i => i === true);
-  
+
     // update isTakenUnderOtherCompany on all other companies
     updatedCompanies = updatedCompanies.map(c => {
       // don't touch already updated company
