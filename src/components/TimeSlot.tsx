@@ -4,6 +4,7 @@ import { Input } from './Input';
 import moment from 'moment';
 
 const hourMinuteFormat = 'HH:mm';
+const selectDateText = 'Please select a date'
 
 interface Props {
     timeSlot: ITime_slot;
@@ -19,11 +20,11 @@ export const TimeSlot: React.FC<Props> = ({ timeSlot, title }) => {
                 </div>
             }
             <Input
-                text={moment(timeSlot.start_time).format(hourMinuteFormat)}
+                text={timeSlot.start_time !== '' ? moment(timeSlot.start_time).format(hourMinuteFormat) : selectDateText}
                 readOnly={true}
             />
             <Input
-                text={moment(timeSlot.end_time).format(hourMinuteFormat)}
+                text={timeSlot.end_time !== '' ? moment(timeSlot.end_time).format(hourMinuteFormat) : selectDateText}
                 readOnly={true}
             />
         </div>
